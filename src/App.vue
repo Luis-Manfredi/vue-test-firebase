@@ -14,73 +14,99 @@
     </v-app-bar>
 
     <v-main>
-      <v-card
-        elevation="2"
-        shaped
-      >
-      
-      <v-form v-model="valid">
-        <v-container>
 
-          <v-col
-            cols="12"
-            md="4"
-          >
-            <v-text-field
-              v-model="user.firstname"
-              :rules="nameRules"
-              :counter="15"
-              label="First name"
-              required
-            ></v-text-field>
+      <v-row align-content="space-between">
+        <!-- Form card -->
+        <v-card
+          elevation="2"
+          shaped
+        >
+        
+        <v-form v-model="valid">
+          <v-container>
+            <v-col
+              cols="12"
+              md="4"
+            >
+              <v-text-field
+                v-model="user.firstname"
+                :rules="nameRules"
+                :counter="15"
+                label="First name"
+                required
+              ></v-text-field>
+            </v-col>
+
+            <v-col
+              cols="12"
+              md="4"
+            >
+              <v-text-field
+                v-model="user.lastname"
+                :rules="nameRules"
+                :counter="15"
+                label="Last name"
+                required
+              ></v-text-field>
+            </v-col>
+
+            <v-col
+              cols="12"
+              md="4"
+            >
+              <v-text-field
+                v-model="user.email"
+                :rules="emailRules"
+                label="E-mail"
+                required
+              ></v-text-field>
+            </v-col>
+
+            <v-btn
+              type="submit"
+              @click="submit"
+            >
+            submit
+            </v-btn>
+          </v-container>
+        </v-form>
+        </v-card>
+
+        <!-- Show data card -->
+
+        <v-card
+          shaped
+          elevation="2"
+          height="150px"
+          style="padding: 20px; text-align: center;"
+        >
+
+          <v-col>
+            <v-btn
+              elevation="2"
+              @click="loadData()"
+              style="margin-bottom: 20px;"
+            >Load Data</v-btn>
+
+            <p v-if="isPressed">Check the developer console</p>
+            
           </v-col>
-
-          <v-col
-            cols="12"
-            md="4"
-          >
-            <v-text-field
-              v-model="user.lastname"
-              :rules="nameRules"
-              :counter="15"
-              label="Last name"
-              required
-            ></v-text-field>
-          </v-col>
-
-          <v-col
-            cols="12"
-            md="4"
-          >
-            <v-text-field
-              v-model="user.email"
-              :rules="emailRules"
-              label="E-mail"
-              required
-            ></v-text-field>
-          </v-col>
-
-          <v-btn
-            type="submit"
-            @click="submit"
-          >
-          submit
-          </v-btn>
-        </v-container>
-      </v-form>
-      </v-card>
+        </v-card>                 
+      </v-row>
     </v-main>
   </v-app>
 </template>
 
 <script>
-// Initialization
+// Imports
 import { initializeApp } from 'firebase/app';
-import { getDatabase, push, ref} from 'firebase/database';
+import { getDatabase, push, ref, onValue} from 'firebase/database';
 import config from './config';
+
+// Initialization
 const app = initializeApp(config);
 const db = getDatabase(app);
-let usersRef = ref(db, 'users');
+const usersRef = ref(db, 'users');
 
 export default {
   name: 'App',
@@ -89,11 +115,10 @@ export default {
     users: usersRef
   },
 
-  components: {
+  components: { },
 
-  },
-
-  data: () => ({ 
+  data: () => ({
+    isPressed: false, 
     drawer: false,
     valid: false,
     user: {
@@ -120,14 +145,21 @@ export default {
         email: this.user.email
       });
 
-      // console.log(this.user.firstname);
-      // console.log(this.user.lastname);
-      // console.log(this.user.email);
-
       // Clear inputs
       this.user.firstname = '';
       this.user.lastname = '';
       this.user.email = '';
+    },
+
+    loadData () {
+      onValue(usersRef, function(snapshot) {
+        var data = snapshot.val();
+        for (let index in data) {
+          console.log(data[index])
+        }
+      });
+
+      this.isPressed = true;
     }
   }
 };
